@@ -19,6 +19,7 @@
 #include <Adafruit_GFX.h>          //https://github.com/adafruit/Adafruit-GFX-Library
 #include <Adafruit_SSD1306.h>      //https://github.com/adafruit/Adafruit_SSD1306
 #include <Adafruit_Fingerprint.h>  //https://github.com/adafruit/Adafruit-Fingerprint-Sensor-Library
+#include <WiFiClient.h>
 //************************************************************************
 //Fingerprint scanner Pins
 #define Finger_Rx 14 //D5
@@ -492,6 +493,9 @@ const uint8_t PROGMEM FinPr_scan_bits[] = {
 ,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 };
 //************************************************************************
+
+//initializing a clinet class for the wifi to help the httpclinet class new version
+WiFiClient client;
 void setup() {
 
   Serial.begin(115200);
@@ -610,7 +614,7 @@ void SendFingerprintID( int finger ){
   postData = "FingerID=" + String(finger); // Add the Fingerprint ID to the Post array in order to send it
   // Post methode
 
-  http.begin(link); //initiate HTTP request, put your Website URL or Your Computer IP 
+  http.begin(client,link); //initiate HTTP request, put your Website URL or Your Computer IP 
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");    //Specify content-type header
   
   int httpCode = http.POST(postData);   //Send the request
@@ -658,6 +662,7 @@ int getFingerprintID() {
   switch (p) {
     case FINGERPRINT_OK:
       //Serial.println("Image taken");
+      return p;
       break;
     case FINGERPRINT_NOFINGER:
       //Serial.println("No finger detected");
@@ -677,6 +682,7 @@ int getFingerprintID() {
   switch (p) {
     case FINGERPRINT_OK:
       //Serial.println("Image converted");
+      return p;
       break;
     case FINGERPRINT_IMAGEMESS:
       //Serial.println("Image too messy");
@@ -722,7 +728,7 @@ void ChecktoDeleteID(){
   postData = "DeleteID=check"; // Add the Fingerprint ID to the Post array in order to send it
   // Post methode
 
-  http.begin(link); //initiate HTTP request, put your Website URL or Your Computer IP 
+  http.begin(client,link); //initiate HTTP request, put your Website URL or Your Computer IP 
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");    //Specify content-type header
   
   int httpCode = http.POST(postData);   //Send the request
@@ -750,6 +756,7 @@ uint8_t deleteFingerprint( int id) {
     display.setCursor(0,0);             // Start at top-left corner
     display.print(F("Deleted!\n"));
     display.display();
+    return p;
   } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
     //Serial.println("Communication error");
     display.clearDisplay();
@@ -796,7 +803,7 @@ void ChecktoAddID(){
   postData = "Get_Fingerid=get_id"; // Add the Fingerprint ID to the Post array in order to send it
   // Post methode
 
-  http.begin(link); //initiate HTTP request, put your Website URL or Your Computer IP 
+  http.begin(client,link); //initiate HTTP request, put your Website URL or Your Computer IP 
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");    //Specify content-type header
   
   int httpCode = http.POST(postData);   //Send the request
@@ -825,6 +832,7 @@ uint8_t getFingerprintEnroll() {
       display.clearDisplay();
       display.drawBitmap( 34, 0, FinPr_valid_bits, FinPr_valid_width, FinPr_valid_height, WHITE);
       display.display();
+        return p;
       break;
     case FINGERPRINT_NOFINGER:
       //Serial.println(".");
@@ -833,17 +841,21 @@ uint8_t getFingerprintEnroll() {
       display.setCursor(0,0);             // Start at top-left corner
       display.print(F("scanning"));
       display.display();
+        return p;
       break;
     case FINGERPRINT_PACKETRECIEVEERR:
       display.clearDisplay();
       display.drawBitmap( 34, 0, FinPr_invalid_bits, FinPr_invalid_width, FinPr_invalid_height, WHITE);
       display.display();
+        return p;
       break;
     case FINGERPRINT_IMAGEFAIL:
       Serial.println("Imaging error");
+        return p;
       break;
     default:
       Serial.println("Unknown error");
+        return p;
       break;
     }
   }
@@ -856,6 +868,7 @@ uint8_t getFingerprintEnroll() {
       display.clearDisplay();
       display.drawBitmap( 34, 0, FinPr_valid_bits, FinPr_valid_width, FinPr_valid_height, WHITE);
       display.display();
+      return p;
       break;
     case FINGERPRINT_IMAGEMESS:
       display.clearDisplay();
@@ -902,6 +915,7 @@ uint8_t getFingerprintEnroll() {
       display.clearDisplay();
       display.drawBitmap( 34, 0, FinPr_valid_bits, FinPr_valid_width, FinPr_valid_height, WHITE);
       display.display();
+        return p;
       break;
     case FINGERPRINT_NOFINGER:
       //Serial.println(".");
@@ -910,15 +924,19 @@ uint8_t getFingerprintEnroll() {
       display.setCursor(0,0);             // Start at top-left corner
       display.print(F("scanning"));
       display.display();
+        return p;
       break;
     case FINGERPRINT_PACKETRECIEVEERR:
       Serial.println("Communication error");
+        return p;
       break;
     case FINGERPRINT_IMAGEFAIL:
       Serial.println("Imaging error");
+        return p;
       break;
     default:
       Serial.println("Unknown error");
+        return p;
       break;
     }
   }
@@ -932,6 +950,7 @@ uint8_t getFingerprintEnroll() {
       display.clearDisplay();
       display.drawBitmap( 34, 0, FinPr_valid_bits, FinPr_valid_width, FinPr_valid_height, WHITE);
       display.display();
+      return p;
       break;
     case FINGERPRINT_IMAGEMESS:
       Serial.println("Image too messy");
@@ -959,6 +978,7 @@ uint8_t getFingerprintEnroll() {
     display.clearDisplay();
     display.drawBitmap( 34, 0, FinPr_valid_bits, FinPr_valid_width, FinPr_valid_height, WHITE);
     display.display();
+    return p;
   } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
     Serial.println("Communication error");
     return p;
@@ -978,6 +998,7 @@ uint8_t getFingerprintEnroll() {
     display.drawBitmap( 34, 0, FinPr_valid_bits, FinPr_valid_width, FinPr_valid_height, WHITE);
     display.display();
     confirmAdding();
+    return p;
   } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
     Serial.println("Communication error");
     return p;
@@ -1000,7 +1021,7 @@ void confirmAdding(){
   postData = "confirm_id=" + String(id); // Add the Fingerprint ID to the Post array in order to send it
   // Post methode
 
-  http.begin(link); //initiate HTTP request, put your Website URL or Your Computer IP 
+  http.begin(client,link); //initiate HTTP request, put your Website URL or Your Computer IP 
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");    //Specify content-type header
   
   int httpCode = http.POST(postData);   //Send the request
