@@ -1,5 +1,10 @@
 <?php  
-session_start();
+//Conditio to check whether the session already exists
+if (session.status()==PHP_SESSION_ACTIVE){
+//Do nothing}
+else{
+  
+session_start();}
 ?>
 <!DOCTYPE html>
 <html>
