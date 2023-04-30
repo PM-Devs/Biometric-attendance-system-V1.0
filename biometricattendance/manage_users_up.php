@@ -14,7 +14,7 @@
         $resultl = mysqli_stmt_get_result($result);
       if (mysqli_num_rows($resultl) > 0){
           while ($row = mysqli_fetch_assoc($resultl)){
-  ?>
+  
               <TR>
               	<TD><?php  
                 		if ($row['fingerprint_select'] == 1) {
@@ -32,7 +32,7 @@
               <TD><?php echo $row['user_date'];?></TD>
               <TD><?php echo $row['time_in'];?></TD>
               </TR>
-<?php
+
         }   
     }
   }
